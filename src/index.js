@@ -1,6 +1,6 @@
-const { Client, GatewayIntentBits, Partials } = require('discord.js');
+const { Client, GatewayIntentBits, Partials, Events } = require('discord.js');
 const config = require('./config');
-const { handleForumThreadCreate } = require('./handlers/forumPostHandler');
+const { handleForumPostMessage } = require('./handlers/forumPostHandler');
 
 const client = new Client({
   intents: [
@@ -11,15 +11,23 @@ const client = new Client({
   partials: [Partials.Channel, Partials.Message],
 });
 
-client.once('ready', () => {
+client.once(Events.ClientReady, () => {
   console.log(`Logged in as ${client.user.tag}`);
 });
 
-client.on('threadCreate', async (thread) => {
+client.on(Events.MessageCreate, async (message) => {
   try {
-    await handleForumThreadCreate(thread);
+    if (message.author.bot) return;
+    if (!message.channel?.isThread()) return;
+
+    const thread = message.channel;
+
+    // 포럼 게시글의 첫 메시지만 처리
+    if (message.id !== thread.id) return;
+
+    await handleForumPostMessage(thread, message);
   } catch (err) {
-    console.error('forum thread handling failed', err);
+    console.error('forum post message handling failed', err);
   }
 });
 
