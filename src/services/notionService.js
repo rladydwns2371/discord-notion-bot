@@ -18,9 +18,11 @@ async function createNotionRow({ summary, domain, type, reporter, sourceUrl, raw
     '접수일': { date: { start: new Date().toISOString().slice(0, 10) } },
   };
 
-  if (assignee) {
-    properties['담당자'] = { select: { name: assignee } };
-  }
+  if (assignees) {
+  properties['담당자'] = {
+    multi_select: assignees.map((name) => ({ name })),
+  };
+}
 
   await notion.pages.create({
     parent: { database_id: config.notionDatabaseId },
