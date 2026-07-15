@@ -5,7 +5,7 @@ const { DOMAIN_OWNERS } = require('../domainOwners');
 const notion = new Client({ auth: config.notionApiKey });
 
 async function createNotionRow({ summary, domain, type, reporter, sourceUrl, rawContent }) {
-  const assignee = DOMAIN_OWNERS[domain];
+  const assignees = DOMAIN_OWNERS[domain];
 
   const properties = {
     '제목': { title: [{ text: { content: summary } }] },
@@ -19,10 +19,10 @@ async function createNotionRow({ summary, domain, type, reporter, sourceUrl, raw
   };
 
   if (assignees) {
-  properties['담당자'] = {
-    multi_select: assignees.map((name) => ({ name })),
-  };
-}
+    properties['담당자'] = {
+      multi_select: assignees.map((name) => ({ name })),
+    };
+  }
 
   await notion.pages.create({
     parent: { database_id: config.notionDatabaseId },
